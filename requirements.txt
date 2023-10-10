@@ -5,5 +5,5 @@ plotly
 Requests
 streamlit
 wordcloud
-speech_recognition
+SpeechRecognition
 gTTS
