@@ -3,4 +3,4 @@ plotly==5.16.1
 Requests==2.31.0
 spacy==3.7.1
 streamlit==1.25.0
-streamlit==1.24.1
+
