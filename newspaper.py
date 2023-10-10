@@ -7,6 +7,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
+import speech_recognition as sr  # Added for voice search
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -16,11 +17,14 @@ nltk.download("punkt")
 
 search_history = []
 bookmarked_articles = []
-user_score = 0
+user_score = 0  # Initialize user's score
 user_emotions = {}
 sia = SentimentIntensityAnalyzer()
 
-# Function to load searc
+# Initialize the SpeechRecognition recognizer
+r = sr.Recognizer()
+
+# Function to load search history
 def load_search_history():
     try:
         with open("search_history.txt", mode="r") as file:
@@ -75,144 +79,38 @@ def display_articles(articles):
             st.write(f"Link: [Read More]({url})")
             st.write(f"Sentiment: {sentiment}")
 
+            # Add a quiz or challenge to each article
+            user_answer = st.text_input("Answer the question related to the article")
+            correct_answer = "Your Correct Answer"  # Set the correct answer
+
+            if user_answer.lower() == correct_answer.lower():
+                st.success("Correct! You earned points.")
+                user_score += 10  # Assign points to the user
+            else:
+                st.error("Sorry, that's incorrect.")
+
     return positive_count, negative_count, neutral_count
 
-# Function to display sentiment distribution chart
-def display_sentiment_chart(positive_count, negative_count, neutral_count):
-    sentiment_data = {
-        "Sentiment": ["Positive", "Negative", "Neutral"],
-        "Count": [positive_count, negative_count, neutral_count]
-    }
-    sentiment_df = pd.DataFrame(sentiment_data)
+# Function to perform voice search
+def voice_search():
+    with sr.Microphone() as source:
+        st.info("Listening for your voice command...")
+        audio = r.listen(source)
 
-    fig_sentiment = px.bar(sentiment_df, x="Sentiment", y="Count", color="Sentiment",
-                           labels={'Count': 'Number of Articles'}, title='Sentiment Analysis Distribution')
-    st.plotly_chart(fig_sentiment, use_container_width=True)
+    try:
+        query = r.recognize_google(audio)
+        st.text_input("Voice Search", query)
 
-# Function to display articles per source chart
-def display_articles_per_source(articles):
-    sources = [article.get('source', {}).get('name', 'Unknown') for article in articles]
-    unique_sources = list(set(sources))
-    source_counts = [sources.count(source) for source in unique_sources]
+        # Perform the search using the recognized query
+        articles = search_news(query)
+        display_articles(articles)
 
-    fig = px.bar(x=unique_sources, y=source_counts, labels={'x': 'Source', 'y': 'Number of Articles'},
-                 title='Number of Articles per Source', text=source_counts)
-    fig.update_traces(texttemplate='%{text}', textposition='outside')
-    st.plotly_chart(fig, use_container_width=True)
+    except sr.UnknownValueError:
+        st.warning("Could not understand the audio.")
+    except sr.RequestError:
+        st.error("Could not request results; check your network connection.")
 
-# Function to display word cloud
-def display_word_cloud(articles):
-    all_content = " ".join([article.get('content', '') for article in articles])
-
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(all_content)
-
-    st.subheader("Word Cloud")
-    plt.figure(figsize=(12, 6))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
-    st.pyplot(plt)
-
-# Function to display search history
-def display_search_history(search_history):
-    if search_history:
-        st.subheader("Search History")
-        for idx, query in enumerate(search_history):
-            st.write(f"{idx+1}. {query}")
-
-# Function to display trending topics
-def display_trending_topics(search_history):
-    if search_history:
-        st.subheader("Trending Topics")
-        query_counts = Counter(search_history)
-        trending_topics = query_counts.most_common(5)
-        for idx, (topic, count) in enumerate(trending_topics):
-            st.write(f"{idx+1}. {topic} ({count} searches)")
-
-# Function to toggle bookmarking an article
-def toggle_bookmark(article_title):
-    if article_title in bookmarked_articles:
-        bookmarked_articles.remove(article_title)
-    else:
-        bookmarked_articles.append(article_title)
-
-# Function to display bookmarked articles
-def display_bookmarked_articles():
-    if bookmarked_articles:
-        st.subheader("Bookmarked Articles")
-        for article_title in bookmarked_articles:
-            st.write(f"- {article_title}")
-
-# Function to clear the search history
-def clear_search_history():
-    with open("search_history.txt", mode="w") as file:
-        file.write("")
-
-# Function to display sentiment distribution by source
-def display_sentiment_by_source(articles):
-    st.subheader("Sentiment Distribution by Source")
-    
-    source_list = list(set([article.get('source', {}).get('name', 'Unknown') for article in articles]))
-    selected_source = st.selectbox("Select a news source:", source_list)
-    
-    filtered_articles = [article for article in articles if article.get('source', {}).get('name', 'Unknown') == selected_source]
-    
-    if filtered_articles:
-        positive_count, negative_count, neutral_count = display_articles(filtered_articles)
-        display_sentiment_chart(positive_count, negative_count, neutral_count)
-    else:
-        st.warning(f"No articles found for the selected source: {selected_source}")
-
-# Function to display sentiment trends over time
-def display_sentiment_over_time(articles):
-    st.subheader("Sentiment Trends Over Time")
-    
-    start_date = st.date_input("Select a start date")
-    end_date = st.date_input("Select an end date", max_value=start_date)  # Limit end date based on start date
-
-    if end_date >= start_date:
-        filtered_articles = [article for article in articles if start_date <= pd.to_datetime(article.get('publishedAt')).date() <= end_date]
-        if filtered_articles:
-            positive_count, negative_count, neutral_count = display_articles(filtered_articles)
-            display_sentiment_chart(positive_count, negative_count, neutral_count)
-        else:
-            st.warning("No articles found within the selected date range.")
-    else:
-        st.warning("End date must be after or equal to the start date.")
-
-# Function to highlight keywords in article content
-def highlight_keywords(articles):
-    st.subheader("Keyword Highlighting")
-    
-    keyword = st.text_input("Enter a keyword to highlight")
-    
-    for article in articles:
-        content = article.get('content', '')
-        if keyword in content:
-            st.subheader(f"Article - {article.get('title', 'No title available')}")
-            highlighted_content = content.replace(keyword, f"**{keyword}**")
-            st.write(f"Title: {article.get('title', 'No title available')}")
-            st.write(f"Author: {article.get('author', 'No author available')}")
-            st.write(highlighted_content)
-
-# Function to recommend related articles based on sentiment
-def recommend_related_articles(articles):
-    st.subheader("Related Articles Recommendation")
-    
-    selected_article = st.selectbox("Select an article for recommendations:", [article['title'] for article in articles])
-    selected_article_sentiment = get_sentiment_label([article['content'] for article in articles if article['title'] == selected_article][0])
-    
-    recommended_articles = [article['title'] for article in articles if get_sentiment_label(article['content']) == selected_article_sentiment and article['title'] != selected_article]
-    
-    if recommended_articles:
-        st.write(f"Articles with similar sentiment to '{selected_article}':")
-        for title in recommended_articles:
-            st.write(f"- {title}")
-    else:
-        st.warning("No related articles found.")
-
-# Function to collect user emotion for an article
-def collect_user_emotion(article_title, emotion):
-    user_emotions[article_title] = emotion
+# Rest of your code (functions)...
 
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
@@ -226,12 +124,16 @@ if input_data:
 
     st.info(f"Found {len(articles)} articles")
 
-    display_sentiment_by_source(articles)  # Add sentiment distribution by source
-    display_sentiment_over_time(articles)  # Add sentiment trends over time
-    highlight_keywords(articles)  # Add keyword highlighting
-    recommend_related_articles(articles)  # Add related articles recommendation
+    display_articles(articles)  # Add quizzes/challenges to articles
 
     # Rest of your Streamlit app here...
+
+# Add a button for voice search
+if st.button("Voice Search"):
+    voice_search()
+
+# Display the user's score
+st.write(f"Your Score: {user_score}")
 
 # Run the app
 if __name__ == "__main__":
