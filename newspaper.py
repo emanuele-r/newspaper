@@ -7,6 +7,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
+from googletrans import Translator  # Import Google Translate API
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -121,6 +122,57 @@ def display_trending_topics(search_history):
         for idx, (topic, count) in enumerate(trending_topics):
             st.write(f"{idx+1}. {topic} ({count} searches)")
 
+# Create a list to store bookmarked articles
+bookmarked_articles = []
+
+# Function to toggle bookmarking an article
+def toggle_bookmark(article_title):
+    if article_title in bookmarked_articles:
+        bookmarked_articles.remove(article_title)
+    else:
+        bookmarked_articles.append(article_title)
+
+# Function to display bookmarked articles
+def display_bookmarked_articles():
+    if bookmarked_articles:
+        st.subheader("Bookmarked Articles")
+        for article_title in bookmarked_articles:
+            st.write(f"- {article_title}")
+
+# Function to translate text
+def translate_text(text, target_language):
+    translator = Translator()
+    translation = translator.translate(text, dest=target_language)
+    return translation.text
+
+# Function to display translation feature
+def display_translation_feature(articles):
+    st.subheader("Language Translation")
+
+    article_to_translate = st.selectbox("Select an article to translate:", [article['title'] for article in articles])
+
+    target_language = st.selectbox("Select the target language:", ["en", "es", "fr", "de"])  # Add more languages as needed
+
+    if st.button("Translate"):
+        article = next((article for article in articles if article['title'] == article_to_translate), None)
+        if article:
+            translated_content = translate_text(article['content'], target_language)
+            st.subheader(f"Translated Content ({target_language.upper()}):")
+            st.write(translated_content)
+
+# Inside the loop for displaying articles (commenting out to add translation feature)
+# for index, article in enumerate(articles):
+#     # Checkbox to bookmark/unbookmark an article
+#     bookmarked = st.checkbox("Bookmark", key=f"bookmark_{index}")
+#     if bookmarked:
+#         toggle_bookmark(title)
+
+# Display bookmarked articles
+# display_bookmarked_articles()
+
+# Display translation feature
+# display_translation_feature(articles)
+
 # Function to clear the search history
 def clear_search_history():
     with open("search_history.txt", mode="w") as file:
@@ -167,6 +219,8 @@ def main():
     if st.button("Start a New Search"):
         st.text_input("Enter keywords")  # Allow the user to enter a new search query
         st.button("Search")  # Trigger the search again
+
+    display_translation_feature(articles)  # Add the translation feature
 
 if __name__ == "__main__":
     main()
