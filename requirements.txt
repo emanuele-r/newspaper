@@ -1,4 +1,3 @@
-portaudio
 
 matplotlib
 nltk
@@ -9,4 +8,4 @@ streamlit
 wordcloud
 SpeechRecognition
 gTTS
-PyAudio
+
