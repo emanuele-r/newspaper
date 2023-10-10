@@ -6,6 +6,5 @@ plotly
 Requests
 streamlit
 wordcloud
-SpeechRecognition
-gTTS
+
 
