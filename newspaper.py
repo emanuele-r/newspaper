@@ -7,7 +7,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
-from googletrans import Translator  # Import Google Translate API
+from googletrans import Translator  
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -161,17 +161,16 @@ def display_translation_feature(articles):
             st.write(translated_content)
 
 # Inside the loop for displaying articles (commenting out to add translation feature)
-# for index, article in enumerate(articles):
-#     # Checkbox to bookmark/unbookmark an article
-#     bookmarked = st.checkbox("Bookmark", key=f"bookmark_{index}")
-#     if bookmarked:
-#         toggle_bookmark(title)
+for index, article in enumerate(articles): 
+    bookmarked = st.checkbox("Bookmark", key=f"bookmark_{index}")
+    if bookmarked:
+        toggle_bookmark(title)
 
 # Display bookmarked articles
-# display_bookmarked_articles()
+ display_bookmarked_articles()
 
 # Display translation feature
-# display_translation_feature(articles)
+ display_translation_feature(articles)
 
 # Function to clear the search history
 def clear_search_history():
