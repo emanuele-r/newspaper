@@ -6,3 +6,4 @@ Requests
 streamlit
 wordcloud
 speech_recognition
+gTTS
