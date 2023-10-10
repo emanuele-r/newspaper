@@ -4,18 +4,21 @@ import plotly.express as px
 import nltk
 import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from collections import Counter
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="News Search anc Sentiment Analysis", page_icon=":newspaper:", layout="wide")
+st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
 st.title("News Search and Sentiment Analysis")
-st.caption("Welcome!, Start searching keyword on the web and visualize the sentiment ")
+st.caption("Welcome! Start searching keywords on the web and visualize the sentiment")
 
 # Load existing search history from a text file
 def load_search_history():
     try:
         with open("search_history.txt", mode="r") as file:
-            return file.read().splitlines()
+            return file.read().splitlines()[-5:]  # Limit to the last 5 entries
     except FileNotFoundError:
         return []
 
@@ -125,7 +128,15 @@ if input_data and articles:
 # Display the search history
 if search_history:
     st.subheader("Search History")
-    for query in search_history:
-        st.write(query)
+    for idx, query in enumerate(search_history):
+        st.write(f"{idx+1}. {query}")
 
-
+# Trending topics based on search history
+if search_history:
+    st.subheader("Trending Topics")
+    # Count the frequency of each search query in the search history
+    query_counts = Counter(search_history)
+    # Get the top 5 trending topics
+    trending_topics = query_counts.most_common(5)
+    for idx, (topic, count) in enumerate(trending_topics):
+        st.write(f"{idx+1}. {topic} ({count} searches)")
