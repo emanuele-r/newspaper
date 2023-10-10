@@ -1,29 +1,16 @@
 import streamlit as st
 import requests
-import plotly.express as px
 import nltk
-import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from collections import Counter
-import speech_recognition as sr
-from gtts import gTTS  # Added for text-to-speech
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
 nltk.download("vader_lexicon")
-nltk.download("punkt")
 
 search_history = []
-bookmarked_articles = []
 user_score = 0  # Initialize user's score
-user_emotions = {}
 sia = SentimentIntensityAnalyzer()
-
-# Initialize the SpeechRecognition recognizer
-r = sr.Recognizer()
 
 # Function to load search history
 def load_search_history():
@@ -90,31 +77,7 @@ def display_articles(articles):
             else:
                 st.error("Sorry, that's incorrect.")
 
-            # Add Text-to-Speech feature
-            if st.button("Listen to Article"):
-                tts = gTTS(content)
-                st.audio(tts.get_audio_data(format="audio/wav"))
-
     return positive_count, negative_count, neutral_count
-
-# Function to perform voice search
-def voice_search():
-    with sr.Microphone() as source:
-        st.info("Listening for your voice command...")
-        audio = r.listen(source)
-
-    try:
-        query = r.recognize_google(audio)
-        st.text_input("Voice Search", query)
-
-        # Perform the search using the recognized query
-        articles = search_news(query)
-        display_articles(articles)
-
-    except sr.UnknownValueError:
-        st.warning("Could not understand the audio.")
-    except sr.RequestError:
-        st.error("Could not request results; check your network connection.")
 
 # Rest of your code (functions)...
 
@@ -133,10 +96,6 @@ if input_data:
     display_articles(articles)  # Add quizzes/challenges to articles
 
     # Rest of your Streamlit app here...
-
-# Add a button for voice search
-if st.button("Voice Search"):
-    voice_search()
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
