@@ -6,9 +6,9 @@ import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="Keyword news search", page_icon=":newspaper:")
+st.set_page_config(page_title="News Search anc Sentiment Analysis", page_icon=":newspaper:")
 
-st.title("Search Keyword News")
+st.title("Start with search a Keyword ")
 
 # Load existing search history from a text file
 def load_search_history():
