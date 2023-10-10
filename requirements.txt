@@ -5,5 +5,4 @@ plotly
 Requests
 streamlit
 wordcloud
-collections
 googletrans
