@@ -11,7 +11,6 @@ from collections import Counter
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
-import nltk
 nltk.download("vader_lexicon")
 nltk.download("punkt")
 
