@@ -7,7 +7,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
-from googletrans import Translator
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -139,89 +138,91 @@ def display_bookmarked_articles():
         for article_title in bookmarked_articles:
             st.write(f"- {article_title}")
 
-# Function to translate text
-def translate_text(text, target_language):
-    translator = Translator()
-    translation = translator.translate(text, dest=target_language)
-    return translation.text
-
-# Function to display translation feature
-def display_translation_feature(articles):
-    st.subheader("Language Translation")
-
-    article_to_translate = st.selectbox("Select an article to translate:", [article['title'] for article in articles])
-
-    target_language = st.selectbox("Select the target language:", ["en", "es", "fr", "de"])  # Add more languages as needed
-
-    if st.button("Translate"):
-        article = next((article for article in articles if article['title'] == article_to_translate), None)
-        if article:
-            translated_content = translate_text(article['content'], target_language)
-            st.subheader(f"Translated Content ({target_language.upper()}):")
-            st.write(translated_content)
-
-# Function to display related news articles based on the selected article
-def display_related_articles(articles, selected_article_title):
-    st.subheader(f"Related Articles to '{selected_article_title}':")
-    
-    # Filter articles with similar keywords in the title
-    related_articles = [article for article in articles if selected_article_title.lower() in article['title'].lower()]
-    
-    if related_articles:
-        for index, article in enumerate(related_articles):
-            st.write(f"Article {index + 1} - {article.get('title', 'No title available')}")
-            st.write(f"Link: [Read More]({article.get('url', '#')})")
-    else:
-        st.write("No related articles found.")
-
 # Function to clear the search history
 def clear_search_history():
     with open("search_history.txt", mode="w") as file:
         file.write("")
 
-# Main Streamlit app
-def main():
-    st.title("News Search and Sentiment Analysis")
-    st.caption("Welcome! Start searching keywords on the web and visualize the sentiment ")
-
-    search_history = load_search_history()
-
-    nltk.download('vader_lexicon')
-    sia = SentimentIntensityAnalyzer()
-
-    input_data = st.text_input("Enter keywords")
-
-    if input_data:
-        search_history.append(input_data)
-
-        with open("search_history.txt", mode="w") as file:
-            file.write("\n".join(search_history))
-
-        articles = search_news(input_data)
-
-        st.info(f"Found {len(articles)} articles")
-
-        positive_count, negative_count, neutral_count = display_articles(articles, sia)
-
+# Function to display sentiment distribution by source
+def display_sentiment_by_source(articles):
+    st.subheader("Sentiment Distribution by Source")
+    
+    source_list = list(set([article.get('source', {}).get('name', 'Unknown') for article in articles]))
+    selected_source = st.selectbox("Select a news source:", source_list)
+    
+    filtered_articles = [article for article in articles if article.get('source', {}).get('name', 'Unknown') == selected_source]
+    
+    if filtered_articles:
+        positive_count, negative_count, neutral_count = display_articles(filtered_articles, sia)
         display_sentiment_chart(positive_count, negative_count, neutral_count)
+    else:
+        st.warning(f"No articles found for the selected source: {selected_source}")
 
-        if articles:
-            display_articles_per_source(articles)
-            display_word_cloud(articles)
-            display_translation_feature(articles)  # Add the translation feature
-            display_related_articles(articles, input_data)  # Display related articles based on search input
+# Function to display sentiment trends over time
+def display_sentiment_over_time(articles):
+    st.subheader("Sentiment Trends Over Time")
+    
+    start_date = st.date_input("Select a start date")
+    end_date = st.date_input("Select an end date", max_value=start_date)
+    
+    filtered_articles = [article for article in articles if start_date <= pd.to_datetime(article.get('publishedAt')).date() <= end_date]
+    
+    if filtered_articles:
+        positive_count, negative_count, neutral_count = display_articles(filtered_articles, sia)
+        display_sentiment_chart(positive_count, negative_count, neutral_count)
+    else:
+        st.warning("No articles found within the selected date range.")
 
-    display_search_history(search_history)
-    display_trending_topics(search_history)
+# Function to highlight keywords in article content
+def highlight_keywords(articles):
+    st.subheader("Keyword Highlighting")
+    
+    keyword = st.text_input("Enter a keyword to highlight")
+    
+    for article in articles:
+        content = article.get('content', '')
+        if keyword in content:
+            st.subheader(f"Article - {article.get('title', 'No title available')}")
+            highlighted_content = content.replace(keyword, f"**{keyword}**")
+            st.write(f"Title: {article.get('title', 'No title available')}")
+            st.write(f"Author: {article.get('author', 'No author available')}")
+            st.write(highlighted_content)
 
-    # Disruptive functions
-    if st.button("Clear Search History"):
-        clear_search_history()
-        st.success("Search history has been cleared.")
+# Function to recommend related articles based on sentiment
+def recommend_related_articles(articles):
+    st.subheader("Related Articles Recommendation")
+    
+    selected_article = st.selectbox("Select an article for recommendations:", [article['title'] for article in articles])
+    selected_article_sentiment = get_sentiment_label([article['content'] for article in articles if article['title'] == selected_article][0], sia)
+    
+    recommended_articles = [article['title'] for article in articles if get_sentiment_label(article['content'], sia) == selected_article_sentiment and article['title'] != selected_article]
+    
+    if recommended_articles:
+        st.write(f"Articles with similar sentiment to '{selected_article}':")
+        for title in recommended_articles:
+            st.write(f"- {title}")
+    else:
+        st.warning("No related articles found.")
 
-    if st.button("Start a New Search"):
-        st.text_input("Enter keywords")  # Allow the user to enter a new search query
-        st.button("Search")  # Trigger the search again
+# ... Rest of the code ...
 
+# Inside the main function
+if input_data:
+    search_history.append(input_data)
+
+    with open("search_history.txt", mode="w") as file:
+        file.write("\n".join(search_history))
+
+    articles = search_news(input_data)
+
+    st.info(f"Found {len(articles)} articles")
+
+    display_sentiment_filter(articles)  # Add sentiment filter
+    display_article_summarization(articles)  # Add article summarization
+    export_to_csv(articles)  # Add data export feature
+
+# ... Rest of the code ...
+
+# Run the app
 if __name__ == "__main__":
     main()
