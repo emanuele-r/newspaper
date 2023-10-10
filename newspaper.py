@@ -11,6 +11,13 @@ from collections import Counter
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
+# Initialize global variables
+search_history = []
+bookmarked_articles = []
+user_score = 0
+user_emotions = {}
+sia = SentimentIntensityAnalyzer()
+
 # Function to load search history
 def load_search_history():
     try:
@@ -32,7 +39,7 @@ def search_news(keyword):
     return articles
 
 # Function to perform sentiment analysis and return sentiment label
-def get_sentiment_label(content, sia):
+def get_sentiment_label(content):
     sentiment_scores = sia.polarity_scores(content)
     if sentiment_scores['compound'] > 0:
         return "Positive"
@@ -42,10 +49,8 @@ def get_sentiment_label(content, sia):
         return "Neutral"
 
 # Function to display articles and sentiment analysis
-def display_articles(articles, sia):
-    positive_count = 0
-    negative_count = 0
-    neutral_count = 0
+def display_articles(articles):
+    positive_count, negative_count, neutral_count = 0, 0, 0
 
     for index, article in enumerate(articles):
         with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
@@ -54,7 +59,7 @@ def display_articles(articles, sia):
             url = article.get('url', '#')
             content = article.get('content', '')
 
-            sentiment = get_sentiment_label(content, sia)
+            sentiment = get_sentiment_label(content)
 
             if sentiment == "Positive":
                 positive_count += 1
@@ -121,9 +126,6 @@ def display_trending_topics(search_history):
         for idx, (topic, count) in enumerate(trending_topics):
             st.write(f"{idx+1}. {topic} ({count} searches)")
 
-# Create a list to store bookmarked articles
-bookmarked_articles = []
-
 # Function to toggle bookmarking an article
 def toggle_bookmark(article_title):
     if article_title in bookmarked_articles:
@@ -153,7 +155,7 @@ def display_sentiment_by_source(articles):
     filtered_articles = [article for article in articles if article.get('source', {}).get('name', 'Unknown') == selected_source]
     
     if filtered_articles:
-        positive_count, negative_count, neutral_count = display_articles(filtered_articles, sia)
+        positive_count, negative_count, neutral_count = display_articles(filtered_articles)
         display_sentiment_chart(positive_count, negative_count, neutral_count)
     else:
         st.warning(f"No articles found for the selected source: {selected_source}")
@@ -168,7 +170,7 @@ def display_sentiment_over_time(articles):
     filtered_articles = [article for article in articles if start_date <= pd.to_datetime(article.get('publishedAt')).date() <= end_date]
     
     if filtered_articles:
-        positive_count, negative_count, neutral_count = display_articles(filtered_articles, sia)
+        positive_count, negative_count, neutral_count = display_articles(filtered_articles)
         display_sentiment_chart(positive_count, negative_count, neutral_count)
     else:
         st.warning("No articles found within the selected date range.")
@@ -193,9 +195,9 @@ def recommend_related_articles(articles):
     st.subheader("Related Articles Recommendation")
     
     selected_article = st.selectbox("Select an article for recommendations:", [article['title'] for article in articles])
-    selected_article_sentiment = get_sentiment_label([article['content'] for article in articles if article['title'] == selected_article][0], sia)
+    selected_article_sentiment = get_sentiment_label([article['content'] for article in articles if article['title'] == selected_article][0])
     
-    recommended_articles = [article['title'] for article in articles if get_sentiment_label(article['content'], sia) == selected_article_sentiment and article['title'] != selected_article]
+    recommended_articles = [article['title'] for article in articles if get_sentiment_label(article['content']) == selected_article_sentiment and article['title'] != selected_article]
     
     if recommended_articles:
         st.write(f"Articles with similar sentiment to '{selected_article}':")
@@ -204,9 +206,12 @@ def recommend_related_articles(articles):
     else:
         st.warning("No related articles found.")
 
-# ... Rest of the code ...
+# Function to collect user emotion for an article
+def collect_user_emotion(article_title, emotion):
+    user_emotions[article_title] = emotion
 
 # Inside the main function
+input_data = st.text_input("Enter a keyword to search for news")
 if input_data:
     search_history.append(input_data)
 
@@ -217,12 +222,13 @@ if input_data:
 
     st.info(f"Found {len(articles)} articles")
 
-    display_sentiment_filter(articles)  # Add sentiment filter
-    display_article_summarization(articles)  # Add article summarization
-    export_to_csv(articles)  # Add data export feature
+    display_sentiment_by_source(articles)  # Add sentiment distribution by source
+    display_sentiment_over_time(articles)  # Add sentiment trends over time
+    highlight_keywords(articles)  # Add keyword highlighting
+    recommend_related_articles(articles)  # Add related articles recommendation
 
-# ... Rest of the code ...
+    # Rest of your Streamlit app here...
 
 # Run the app
 if __name__ == "__main__":
-    main()
+    st.write("Welcome to the News Search and Sentiment Analysis app.")
