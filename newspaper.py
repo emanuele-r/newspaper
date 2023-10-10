@@ -19,9 +19,6 @@ def load_search_history():
 
 search_history = load_search_history()
 
-# Load the spaCy model
-nlp = spacy.load("en_core_web_sm")
-
 
 def api_keys():
     with open("api.txt", mode="r") as f:
