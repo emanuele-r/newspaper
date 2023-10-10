@@ -66,8 +66,7 @@ if input_data:
             url = article.get('url', '#')
             content = article.get('content', '')
             
-            # Extract topics from the article content
-            topics = extract_topics(content)
+           
             
             # Perform sentiment analysis
             sentiment_scores = sia.polarity_scores(content)
