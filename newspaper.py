@@ -7,7 +7,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
-from googletrans import Translator  
+from googletrans import Translator
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -160,17 +160,19 @@ def display_translation_feature(articles):
             st.subheader(f"Translated Content ({target_language.upper()}):")
             st.write(translated_content)
 
-# Inside the loop for displaying articles (commenting out to add translation feature)
-for index, article in enumerate(articles): 
-    bookmarked = st.checkbox("Bookmark", key=f"bookmark_{index}")
-    if bookmarked:
-        toggle_bookmark(title)
-
-# Display bookmarked articles
- display_bookmarked_articles()
-
-# Display translation feature
- display_translation_feature(articles)
+# Function to display related news articles based on the selected article
+def display_related_articles(articles, selected_article_title):
+    st.subheader(f"Related Articles to '{selected_article_title}':")
+    
+    # Filter articles with similar keywords in the title
+    related_articles = [article for article in articles if selected_article_title.lower() in article['title'].lower()]
+    
+    if related_articles:
+        for index, article in enumerate(related_articles):
+            st.write(f"Article {index + 1} - {article.get('title', 'No title available')}")
+            st.write(f"Link: [Read More]({article.get('url', '#')})")
+    else:
+        st.write("No related articles found.")
 
 # Function to clear the search history
 def clear_search_history():
@@ -206,6 +208,8 @@ def main():
         if articles:
             display_articles_per_source(articles)
             display_word_cloud(articles)
+            display_translation_feature(articles)  # Add the translation feature
+            display_related_articles(articles, input_data)  # Display related articles based on search input
 
     display_search_history(search_history)
     display_trending_topics(search_history)
@@ -218,8 +222,6 @@ def main():
     if st.button("Start a New Search"):
         st.text_input("Enter keywords")  # Allow the user to enter a new search query
         st.button("Search")  # Trigger the search again
-
-    display_translation_feature(articles)  # Add the translation feature
 
 if __name__ == "__main__":
     main()
