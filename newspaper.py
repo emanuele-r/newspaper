@@ -4,7 +4,26 @@ import plotly.express as px
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import emoji
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt  # Required for word cloud visualization
+import pandas as pd  # Required for data manipulation
 
+# ... (rest of your code remains unchanged)
+
+# Word Cloud Visualization
+if input_data and articles:
+    # Concatenate article content into a single text
+    all_content = " ".join([article.get('content', '') for article in articles])
+
+    # Create a WordCloud object
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(all_content)
+
+    # Display the WordCloud using matplotlib
+    st.subheader("Word Cloud")
+    plt.figure(figsize=(12, 6))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    st.pyplot(plt)
 # Set Streamlit page configuration
 st.set_page_config(page_title="Keyword news search", page_icon=":newspaper:")
 
