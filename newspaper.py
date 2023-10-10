@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import plotly.express as px
-import spacy
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
@@ -23,10 +22,6 @@ search_history = load_search_history()
 # Load the spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-def extract_topics(text):
-    doc = nlp(text)
-    topics = [token.text for token in doc.ents if token.label_ == "PERSON" or token.label_ == "ORG"]
-    return topics
 
 def api_keys():
     with open("api.txt", mode="r") as f:
@@ -90,7 +85,6 @@ if input_data:
             st.write(f"Title: {title}")
             st.write(f"Author: {author}")
             st.write(f"Link: [Read More]({url})")
-            st.write(f"Topics: {', '.join(topics)}")
             st.write(f"Sentiment: {sentiment}")
 
 # Data Visualization
