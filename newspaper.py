@@ -10,21 +10,7 @@ import pandas as pd  # Required for data manipulation
 
 # ... (rest of your code remains unchanged)
 
-# Word Cloud Visualization
-if input_data and articles:
-    # Concatenate article content into a single text
-    all_content = " ".join([article.get('content', '') for article in articles])
 
-    # Create a WordCloud object
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(all_content)
-
-    # Display the WordCloud using matplotlib
-    st.subheader("Word Cloud")
-    plt.figure(figsize=(12, 6))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
-    st.pyplot(plt)
-# Set Streamlit page configuration
 st.set_page_config(page_title="Keyword news search", page_icon=":newspaper:")
 
 st.title("Search Keyword News")
@@ -58,6 +44,9 @@ sia = SentimentIntensityAnalyzer()
 
 input_data = st.text_input("Enter keywords")
 
+
+
+
 if input_data:
     # Add the current search query to the search history
     search_history.append(input_data)
@@ -68,6 +57,23 @@ if input_data:
 
     # Fetch news articles
     articles = search_news(input_data)
+
+
+# Word Cloud Visualization
+if input_data and articles:
+    # Concatenate article content into a single text
+    all_content = " ".join([article.get('content', '') for article in articles])
+
+    # Create a WordCloud object
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(all_content)
+
+    # Display the WordCloud using matplotlib
+    st.subheader("Word Cloud")
+    plt.figure(figsize=(12, 6))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    st.pyplot(plt)
+
 
     # Display the number of articles found
     st.info(f"Found {len(articles)} articles")
