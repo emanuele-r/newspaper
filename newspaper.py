@@ -20,10 +20,10 @@ def load_search_history():
 search_history = load_search_history()
 
 
-def api_keys():
-    with open("api.txt", mode="r") as f:
-        api = f.readline().strip()  # Remove leading/trailing whitespace
-    return api
+# def api_keys():
+#     with open("api.txt", mode="r") as f:
+#         api = f.readline().strip()  # Remove leading/trailing whitespace
+#     return api
 
 def search_news(keyword: str):
     api_key = api_keys()  # Load the NewsAPI key securely
