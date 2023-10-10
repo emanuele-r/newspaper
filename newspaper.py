@@ -46,9 +46,7 @@ sia = SentimentIntensityAnalyzer()
 
 input_data = st.text_input("Enter keywords")
 
-if not spacy.util.is_package('en_core_web_sm'):
-    st.write("Downloading 'en_core_web_sm' model...")
-    spacy.cli.download("en_core_web_sm")
+
 
 if input_data:
     # Add the current search query to the search history
