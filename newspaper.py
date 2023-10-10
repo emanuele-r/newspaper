@@ -127,4 +127,3 @@ if search_history:
         st.write(query)
 
 
-This code no longer includes emojis in the sentiment analysis and display.
