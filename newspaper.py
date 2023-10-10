@@ -7,7 +7,8 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
-import speech_recognition as sr  # Added for voice search
+import speech_recognition as sr
+from gtts import gTTS  # Added for text-to-speech
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -88,6 +89,11 @@ def display_articles(articles):
                 user_score += 10  # Assign points to the user
             else:
                 st.error("Sorry, that's incorrect.")
+
+            # Add Text-to-Speech feature
+            if st.button("Listen to Article"):
+                tts = gTTS(content)
+                st.audio(tts.get_audio_data(format="audio/wav"))
 
     return positive_count, negative_count, neutral_count
 
