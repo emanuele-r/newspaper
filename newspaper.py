@@ -26,7 +26,7 @@ search_history = load_search_history()
 #     return api
 
 def search_news(keyword: str):
-    api_key = api_keys()  # Load the NewsAPI key securely
+    # api_key = api_keys()  # Load the NewsAPI key securely
 
     response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey=89de75b718bb45ba884f256d3b1710cc")
 
