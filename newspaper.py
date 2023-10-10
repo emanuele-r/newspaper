@@ -1,6 +1,3 @@
-To remove emojis from your code, you can simply delete the lines of code that deal with emojis. Here's your code with the emoji-related lines removed:
-
-```python
 import streamlit as st
 import requests
 import plotly.express as px
