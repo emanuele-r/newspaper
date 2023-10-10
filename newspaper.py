@@ -106,11 +106,25 @@ if input_data and articles:
     fig.update_traces(texttemplate='%{text}', textposition='outside')
     st.plotly_chart(fig, use_container_width=True)
 
+if input_data and articles:
+    # Concatenate article content into a single text
+    all_content = " ".join([article.get('content', '') for article in articles])
+
+    # Create a WordCloud object
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(all_content)
+
+    # Display the WordCloud using matplotlib
+    st.subheader("Word Cloud")
+    plt.figure(figsize=(12, 6))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    st.pyplot(plt)
+
 # Display the search history
 if search_history:
     st.subheader("Search History")
     for query in search_history:
         st.write(query)
-```
+
 
 This code no longer includes emojis in the sentiment analysis and display.
