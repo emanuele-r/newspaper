@@ -8,7 +8,8 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search anc Sentiment Analysis", page_icon=":newspaper:")
 
-st.title("Start with search a Keyword ")
+st.title("Welcome!, Start searching keyword on the web and visualize the sentiment ")
+
 
 # Load existing search history from a text file
 def load_search_history():
