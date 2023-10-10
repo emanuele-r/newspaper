@@ -11,14 +11,17 @@ from collections import Counter
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
-# Initialize global variables
+import nltk
+nltk.download("vader_lexicon")
+nltk.download("punkt")
+
 search_history = []
 bookmarked_articles = []
 user_score = 0
 user_emotions = {}
 sia = SentimentIntensityAnalyzer()
 
-# Function to load search history
+# Function to load searc
 def load_search_history():
     try:
         with open("search_history.txt", mode="r") as file:
