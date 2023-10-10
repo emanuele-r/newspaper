@@ -11,10 +11,7 @@ from collections import Counter
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
-st.title("News Search and Sentiment Analysis")
-st.caption("Welcome! Start searching keywords on the web and visualize the sentiment")
-
-# Load existing search history from a text file
+# Function to load search history
 def load_search_history():
     try:
         with open("search_history.txt", mode="r") as file:
@@ -22,47 +19,34 @@ def load_search_history():
     except FileNotFoundError:
         return []
 
-search_history = load_search_history()
-
-def search_news(keyword: str):
+# Function to search for news articles
+def search_news(keyword):
     response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey=89de75b718bb45ba884f256d3b1710cc")
-
     articles = []
 
     if response.status_code == 200:
         data = response.json()
-
         if 'articles' in data:
             articles = data['articles']
 
     return articles
 
-# Initialize the VADER sentiment analyzer
-nltk.download('vader_lexicon')
-sia = SentimentIntensityAnalyzer()
+# Function to perform sentiment analysis and return sentiment label
+def get_sentiment_label(content, sia):
+    sentiment_scores = sia.polarity_scores(content)
+    if sentiment_scores['compound'] > 0:
+        return "Positive"
+    elif sentiment_scores['compound'] < 0:
+        return "Negative"
+    else:
+        return "Neutral"
 
-input_data = st.text_input("Enter keywords")
-
-if input_data:
-    # Add the current search query to the search history
-    search_history.append(input_data)
-
-    # Save the updated search history to the text file
-    with open("search_history.txt", mode="w") as file:
-        file.write("\n".join(search_history))
-
-    # Fetch news articles
-    articles = search_news(input_data)
-
-    # Display the number of articles found
-    st.info(f"Found {len(articles)} articles")
-
-    # Initialize counters for sentiment analysis
+# Function to display articles and sentiment analysis
+def display_articles(articles, sia):
     positive_count = 0
     negative_count = 0
     neutral_count = 0
 
-    # Display each article with title, author, link, and sentiment analysis
     for index, article in enumerate(articles):
         with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
             title = article.get('title', 'No title available')
@@ -70,11 +54,8 @@ if input_data:
             url = article.get('url', '#')
             content = article.get('content', '')
 
-            # Perform sentiment analysis
-            sentiment_scores = sia.polarity_scores(content)
-            sentiment = "Positive" if sentiment_scores['compound'] > 0 else "Negative" if sentiment_scores['compound'] < 0 else "Neutral"
+            sentiment = get_sentiment_label(content, sia)
 
-            # Update sentiment counters
             if sentiment == "Positive":
                 positive_count += 1
             elif sentiment == "Negative":
@@ -87,7 +68,10 @@ if input_data:
             st.write(f"Link: [Read More]({url})")
             st.write(f"Sentiment: {sentiment}")
 
-    # Create a bar chart to visualize sentiment distribution
+    return positive_count, negative_count, neutral_count
+
+# Function to display sentiment distribution chart
+def display_sentiment_chart(positive_count, negative_count, neutral_count):
     sentiment_data = {
         "Sentiment": ["Positive", "Negative", "Neutral"],
         "Count": [positive_count, negative_count, neutral_count]
@@ -98,45 +82,77 @@ if input_data:
                            labels={'Count': 'Number of Articles'}, title='Sentiment Analysis Distribution')
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-# Data Visualization
-if input_data and articles:
-    # Create a bar chart to visualize the number of articles per source
+# Function to display articles per source chart
+def display_articles_per_source(articles):
     sources = [article.get('source', {}).get('name', 'Unknown') for article in articles]
-    unique_sources = list(set(sources))  # Get unique source names
+    unique_sources = list(set(sources))
     source_counts = [sources.count(source) for source in unique_sources]
 
-    # Create an interactive bar chart using Plotly
     fig = px.bar(x=unique_sources, y=source_counts, labels={'x': 'Source', 'y': 'Number of Articles'},
                  title='Number of Articles per Source', text=source_counts)
     fig.update_traces(texttemplate='%{text}', textposition='outside')
     st.plotly_chart(fig, use_container_width=True)
 
-if input_data and articles:
-    # Concatenate article content into a single text
+# Function to display word cloud
+def display_word_cloud(articles):
     all_content = " ".join([article.get('content', '') for article in articles])
 
-    # Create a WordCloud object
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(all_content)
 
-    # Display the WordCloud using matplotlib
     st.subheader("Word Cloud")
     plt.figure(figsize=(12, 6))
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     st.pyplot(plt)
 
-# Display the search history
-if search_history:
-    st.subheader("Search History")
-    for idx, query in enumerate(search_history):
-        st.write(f"{idx+1}. {query}")
+# Function to display search history
+def display_search_history(search_history):
+    if search_history:
+        st.subheader("Search History")
+        for idx, query in enumerate(search_history):
+            st.write(f"{idx+1}. {query}")
 
-# Trending topics based on search history
-if search_history:
-    st.subheader("Trending Topics")
-    # Count the frequency of each search query in the search history
-    query_counts = Counter(search_history)
-    # Get the top 5 trending topics
-    trending_topics = query_counts.most_common(5)
-    for idx, (topic, count) in enumerate(trending_topics):
-        st.write(f"{idx+1}. {topic} ({count} searches)")
+# Function to display trending topics
+def display_trending_topics(search_history):
+    if search_history:
+        st.subheader("Trending Topics")
+        query_counts = Counter(search_history)
+        trending_topics = query_counts.most_common(5)
+        for idx, (topic, count) in enumerate(trending_topics):
+            st.write(f"{idx+1}. {topic} ({count} searches)")
+
+# Main Streamlit app
+def main():
+    st.title("News Search and Sentiment Analysis")
+    st.caption("Welcome! Start searching keywords on the web and visualize the sentiment ")
+
+    search_history = load_search_history()
+
+    nltk.download('vader_lexicon')
+    sia = SentimentIntensityAnalyzer()
+
+    input_data = st.text_input("Enter keywords")
+
+    if input_data:
+        search_history.append(input_data)
+
+        with open("search_history.txt", mode="w") as file:
+            file.write("\n".join(search_history))
+
+        articles = search_news(input_data)
+
+        st.info(f"Found {len(articles)} articles")
+
+        positive_count, negative_count, neutral_count = display_articles(articles, sia)
+
+        display_sentiment_chart(positive_count, negative_count, neutral_count)
+
+        if articles:
+            display_articles_per_source(articles)
+            display_word_cloud(articles)
+
+    display_search_history(search_history)
+    display_trending_topics(search_history)
+
+if __name__ == "__main__":
+    main()
