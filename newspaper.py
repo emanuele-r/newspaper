@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import plotly.express as px
 import nltk
+import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # Set Streamlit page configuration
