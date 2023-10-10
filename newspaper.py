@@ -167,15 +167,17 @@ def display_sentiment_over_time(articles):
     st.subheader("Sentiment Trends Over Time")
     
     start_date = st.date_input("Select a start date")
-    end_date = st.date_input("Select an end date", max_value=start_date)
-    
-    filtered_articles = [article for article in articles if start_date <= pd.to_datetime(article.get('publishedAt')).date() <= end_date]
-    
-    if filtered_articles:
-        positive_count, negative_count, neutral_count = display_articles(filtered_articles)
-        display_sentiment_chart(positive_count, negative_count, neutral_count)
+    end_date = st.date_input("Select an end date", max_value=start_date)  # Limit end date based on start date
+
+    if end_date >= start_date:
+        filtered_articles = [article for article in articles if start_date <= pd.to_datetime(article.get('publishedAt')).date() <= end_date]
+        if filtered_articles:
+            positive_count, negative_count, neutral_count = display_articles(filtered_articles)
+            display_sentiment_chart(positive_count, negative_count, neutral_count)
+        else:
+            st.warning("No articles found within the selected date range.")
     else:
-        st.warning("No articles found within the selected date range.")
+        st.warning("End date must be after or equal to the start date.")
 
 # Function to highlight keywords in article content
 def highlight_keywords(articles):
