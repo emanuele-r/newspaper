@@ -7,3 +7,4 @@ streamlit
 wordcloud
 SpeechRecognition
 gTTS
+PyAudio
