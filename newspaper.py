@@ -6,7 +6,7 @@ import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="News Search anc Sentiment Analysis", page_icon=":newspaper:")
+st.set_page_config(page_title="News Search anc Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
 st.title("News Search and Sentiment Analysis")
 st.caption("Welcome!, Start searching keyword on the web and visualize the sentiment ")
