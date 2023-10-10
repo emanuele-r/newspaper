@@ -121,6 +121,11 @@ def display_trending_topics(search_history):
         for idx, (topic, count) in enumerate(trending_topics):
             st.write(f"{idx+1}. {topic} ({count} searches)")
 
+# Function to clear the search history
+def clear_search_history():
+    with open("search_history.txt", mode="w") as file:
+        file.write("")
+
 # Main Streamlit app
 def main():
     st.title("News Search and Sentiment Analysis")
@@ -153,6 +158,15 @@ def main():
 
     display_search_history(search_history)
     display_trending_topics(search_history)
+
+    # Disruptive functions
+    if st.button("Clear Search History"):
+        clear_search_history()
+        st.success("Search history has been cleared.")
+
+    if st.button("Start a New Search"):
+        st.text_input("Enter keywords")  # Allow the user to enter a new search query
+        st.button("Search")  # Trigger the search again
 
 if __name__ == "__main__":
     main()
