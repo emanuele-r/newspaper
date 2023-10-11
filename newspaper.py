@@ -126,6 +126,7 @@ def display_topics_and_analytics(articles, article_data):
     else:
         st.info("No sentiment data available for analytics.")
 
+
 # Main function
 def main():
     # Load search history
