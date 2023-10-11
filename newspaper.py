@@ -106,9 +106,9 @@ def display_articles(articles):
 
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
-    
+
     if lda is not None:
-        term_topic_matrix = lda.transform(tfidf_vectorizer.transform(content))
+        term_topic_matrix = lda.transform(tfidf_vectorizer.transform([article["content"] for article in articles]))
         num_top_words = 10
 
         for topic_idx in range(lda.n_components):
@@ -119,10 +119,10 @@ def display_topics_and_analytics(articles, article_data):
             st.write(", ".join(top_words))
     else:
         st.warning("Topic extraction is not available because 'lda' is not initialized.")
-    
+
     st.subheader("Data Analytics")
 
-    if article_data and all("Sentiment" in article and article["Sentiment"] for article in article_data):
+    if article_data and all("Sentiment" in article for article in article_data):
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
