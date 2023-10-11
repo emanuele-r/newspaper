@@ -52,12 +52,11 @@ def get_sentiment_label(content):
     else:
         return "Neutral"
 
-# Function to extract topics from articles
 def extract_topics(articles):
     content = [article.get('content', '') for article in articles]
     tfidf = tfidf_vectorizer.fit_transform(content)
-    
-    global lda
+
+    # Initialize the LDA model
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
 
