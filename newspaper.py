@@ -2,8 +2,10 @@ import streamlit as st
 import requests
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
-# Set Streamlit page configuration
+
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
 
 nltk.download("vader_lexicon")
@@ -19,6 +21,17 @@ def load_search_history():
             return file.read().splitlines()[-5:]  # Limit to the last 5 entries
     except FileNotFoundError:
         return []
+
+def create_word_cloud(articles):
+    all_content = " ".join([article.get('content', '') for article in articles])
+    wordcloud = WordCloud(width=800, height=400, max_words=100).generate(all_content)
+    
+    st.pyplot(plt.figure())
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+
+
 
 # Function to search for news articles
 def search_news(keyword):
@@ -93,8 +106,8 @@ if input_data:
     st.info(f"Found {len(articles)} articles")
 
     display_articles(articles)  # Add quizzes/challenges to articles
-
-    # Rest of your Streamlit app here...
+    create_word_cloud(articles)  # Generate word cloud
+    # Rest of your Streamlit app here
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
