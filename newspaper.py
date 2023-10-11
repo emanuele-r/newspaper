@@ -49,7 +49,7 @@ def display_articles(articles):
     for index, article in enumerate(articles):
         with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
             title = article.get('title', 'No title available')
-            author = article.get('author', 'No author available')
+            author = article get('author', 'No author available')
             url = article.get('url', '#')
             content = article.get('content', '')
 
@@ -67,8 +67,7 @@ def display_articles(articles):
             st.write(f"Link: [Read More]({url})")
             st.write(f"Sentiment: {sentiment}")
 
-            # Add a quiz or challenge to each article
-            user_answer = st.text_input("Answer the question related to the article")
+            user_answer = st.text_input(f"Answer for Article {index + 1}", key=f"answer_{index}")
             correct_answer = "Your Correct Answer"  # Set the correct answer
 
             if user_answer.lower() == correct_answer.lower():
