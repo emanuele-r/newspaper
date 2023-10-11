@@ -2,11 +2,9 @@ import streamlit as st
 import requests
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-import pandas as pd  
+import pandas as pd
 from summarizer import Summarizer
 
 # Set Streamlit page configuration
@@ -74,7 +72,7 @@ def display_articles(articles):
         title = article.get('title', 'No title available')
         content = article.get('content', '')
         author = article.get("author", "")
-        link = article.get("link", "")
+        link = article.get("url", "")
 
         # Generate a summary
         summary = generate_summary(article)
