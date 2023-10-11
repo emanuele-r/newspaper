@@ -68,7 +68,6 @@ def display_articles(articles):
     for index, article in enumerate(articles):
         with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
             title = article.get('title', 'No title available')
-            url = article.get('url', '#')
             content = article.get('content', '')
 
             sentiment = get_sentiment_label(content)
@@ -81,7 +80,6 @@ def display_articles(articles):
                 neutral_count += 1
 
             st.write(f"Title: {title}")
-            st.write(f"Link: [Read More]({url})")
             st.write(f"Sentiment: {sentiment}")
 
             user_answer = st.text_input(f"Answer for Article {index + 1}", key=f"answer_{index}")
