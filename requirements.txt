@@ -7,4 +7,4 @@ Requests
 streamlit
 wordcloud
 scikit-learn
-
+bert-extractive-summarizer
