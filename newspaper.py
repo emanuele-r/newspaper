@@ -29,7 +29,7 @@ def search_news(keyword):
     response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey=89de75b718bb45ba884f256d3b1710cc")
     articles = []
 
-    if response.status_code == 200:
+    if response status_code == 200:
         data = response.json()
         if 'articles' in data:
             articles = data['articles']
@@ -60,17 +60,6 @@ def extract_topics(articles):
     lda.fit(tfidf)
 
     return lda, tfidf_vectorizer  # Return both the LDA model and the vectorizer
-
-
-def display_topics_and_analytics(articles):
-    st.subheader("Topics Tags")
-    lda, tfidf_vectorizer = extract_topics(articles)  # Unpack both the LDA model and the vectorizer
-
-    # Display the topics
-    for topic_idx, topic in enumerate(lda.components_):
-        st.write(f"Topic {topic_idx + 1}:")
-        top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
-        st.write(", ".join(top_words)
 
 # Function to display articles and sentiment analysis
 def display_articles(articles):
@@ -108,6 +97,17 @@ def display_articles(articles):
 
     return positive_count, negative_count, neutral_count
 
+# Function to display topics and analytics
+def display_topics_and_analytics(articles):
+    st.subheader("Topics Tags")
+    lda, tfidf_vectorizer = extract_topics(articles)
+
+    # Display the topics
+    for topic_idx, topic in enumerate(lda.components_):
+        st.write(f"Topic {topic_idx + 1}:")
+        top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
+        st.write(", ".join(top_words))
+        
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
 if input_data:
@@ -122,8 +122,6 @@ if input_data:
 
     display_articles(articles)  # Add quizzes/challenges to articles
     display_topics_and_analytics(articles)  # Add topics tags and analytics
-
-
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
