@@ -113,13 +113,15 @@ def display_articles(articles):
 
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
-    lda = extract_topics(articles)
-
-    for topic_idx, topic in enumerate(lda.components_):
-        st.write(f"Topic {topic_idx + 1}:")
-        top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
-        st.write(", ".join(top_words))
-
+    
+    if lda is not None:
+        for topic_idx, topic in enumerate(lda.components_):
+            st.write(f"Topic {topic_idx + 1}:")
+            top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
+            st.write(", ".join(top_words))
+    else:
+        st.warning("Topic extraction is not available because 'lda' is not initialized.")
+    
     st.subheader("Data Analytics")
 
     if article_data and "Sentiment" in article_data[0]:
