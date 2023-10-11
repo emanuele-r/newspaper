@@ -49,7 +49,7 @@ def display_articles(articles):
     for index, article in enumerate(articles):
         with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
             title = article.get('title', 'No title available')
-            author = article get('author', 'No author available')
+            author = article.get('author', 'No author available')
             url = article.get('url', '#')
             content = article.get('content', '')
 
