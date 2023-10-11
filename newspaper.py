@@ -109,10 +109,16 @@ def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
     
     if lda is not None:
-        for topic_idx, topic in enumerate(lda.components_):
+        term_topic_matrix = lda.transform(tfidf_vectorizer.transform(content))
+        num_top_words = 10
+
+        for topic_idx in range(lda.n_components):
             st.write(f"Topic {topic_idx + 1}:")
-            top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
+            topic = term_topic_matrix[:, topic_idx]
+            top_word_indices = topic.argsort()[-num_top_words:][::-1]
+            top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in top_word_indices]
             st.write(", ".join(top_words))
+
     else:
         st.warning("Topic extraction is not available because 'lda' is not initialized.")
     
@@ -146,6 +152,7 @@ def main():
             st.error(f"An error occurred while saving the search history: {str(e)}")
 
         articles = search_news(input_data)
+        extract_topics(articles)  # Call the topic extraction function
         article_data = display_articles(articles)
 
         st.info(f"Found {len(articles)} articles")
