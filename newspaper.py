@@ -15,6 +15,7 @@ nltk.download("vader_lexicon")
 search_history = []
 user_score = 0  # Initialize user's score
 sia = SentimentIntensityAnalyzer()
+tfidf_vectorizer = None  # Define tfidf_vectorizer globally
 
 # Function to load search history
 def load_search_history():
@@ -50,6 +51,7 @@ def extract_topics(articles):
     content = [article.get('content', '') for article in articles]
 
     # Create a TF-IDF vectorizer
+    global tfidf_vectorizer  # Use the globally defined tfidf_vectorizer
     tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 
     # Apply the vectorizer to the content
@@ -59,7 +61,7 @@ def extract_topics(articles):
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
 
-    return lda, tfidf_vectorizer  # Return both the LDA model and the vectorizer
+    return lda
 
 # Function to display articles and sentiment analysis
 def display_articles(articles):
@@ -96,13 +98,13 @@ def display_articles(articles):
 # Function to display topics and analytics
 def display_topics_and_analytics(articles):
     st.subheader("Topics Tags")
-    lda, tfidf_vectorizer = extract_topics(articles)
+    lda = extract_topics(articles)
 
     # Display the topics
     for topic_idx, topic in enumerate(lda.components_):
         st.write(f"Topic {topic_idx + 1}:")
         top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
-        st.write(", ".join(top_words))
+        st.write(", ".join(top_words)
         
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
