@@ -20,7 +20,7 @@ search_history = []
 user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
-lda = LatentDirichletAllocation(n_components=5, random_state=42)
+lda = None  # Initialize LDA model
 
 # Function to load search history
 def load_search_history():
@@ -52,21 +52,15 @@ def get_sentiment_label(content):
     else:
         return "Neutral"
 
+# Function to extract topics from articles
 def extract_topics(articles):
-    content = [article.get('content', '') for article in articles if article.get('content')]
-    
-    if not content:
-        st.warning("No content available for topic extraction.")
-        return None
-
+    content = [article.get('content', '') for article in articles]
     tfidf = tfidf_vectorizer.fit_transform(content)
+    
+    global lda
+    lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
-    return lda
 
-
-
-
-# Function to display articles and return statistics
 def display_articles(articles):
     positive_count, negative_count, neutral_count = 0, 0, 0
     article_data = []
@@ -135,7 +129,6 @@ def display_topics_and_analytics(articles, article_data):
     else:
         st.info("No sentiment data available for analytics.")
 
-
 # Main function
 def main():
     # Load search history
@@ -158,7 +151,6 @@ def main():
         st.info(f"Found {len(articles)} articles")
 
         display_topics_and_analytics(articles, article_data)
-
         # Display the user's score
         st.write(f"Your Score: {user_score}")
 
