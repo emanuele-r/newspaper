@@ -103,7 +103,7 @@ def display_articles(articles):
         })
 
     return positive_count, negative_count, neutral_count, article_data
-
+    
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
 
@@ -122,7 +122,7 @@ def display_topics_and_analytics(articles, article_data):
 
     st.subheader("Data Analytics")
 
-    if article_data and all("Sentiment" in article for article in article_data):
+    if isinstance(article_data, list) and all("Sentiment" in article for article in article_data):
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
@@ -134,7 +134,7 @@ def display_topics_and_analytics(articles, article_data):
         st.info("No sentiment data available for analytics.")
 
 
-
+  
 # Main function
 def main():
     # Load search history
