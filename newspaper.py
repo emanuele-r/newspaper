@@ -75,6 +75,8 @@ def display_articles(articles):
     for index, article in enumerate(articles):
         title = article.get('title', 'No title available')
         content = article.get('content', '')
+        author= article.get("author", "")
+        link=article.get("link", "")
 
         # Generate a summary
         summary = generate_summary(article)
@@ -83,6 +85,8 @@ def display_articles(articles):
 
         with st.expander(f"Article {index + 1} - {title}"):
             st.write(f"Title: {title}")
+            st.write(f"Author: {author}")
+            st.write(f"Link to News: {link}")
             st.write(f"Summary: {summary}")  # Display the summary
             st.write(f"Sentiment: {sentiment}")
 
