@@ -6,7 +6,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-from summarizer import Summarizer
+import pandas as pd  # Import pandas for data analytics
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -22,10 +22,6 @@ user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 lda = LatentDirichletAllocation(n_components=5, random_state=42)
-summarizer_model = Summarizer()  # Initialize the summarization model
-
-
-
 
 # Function to load search history
 def load_search_history():
@@ -71,12 +67,13 @@ def generate_summary(article):
 
 def display_articles(articles):
     positive_count, negative_count, neutral_count = 0, 0, 0
+    article_data = []
 
     for index, article in enumerate(articles):
         title = article.get('title', 'No title available')
         content = article.get('content', '')
-        author= article.get("author", "")
-        link=article.get("link", "")
+        author = article.get("author", "")
+        link = article.get("link", "")
 
         # Generate a summary
         summary = generate_summary(article)
@@ -106,11 +103,19 @@ def display_articles(articles):
         else:
             neutral_count += 1
 
-    return positive_count, negative_count, neutral_count
+        # Collect data for analytics
+        article_data.append({
+            "Title": title,
+            "Author": author,
+            "Link": link,
+            "Summary": summary,
+            "Sentiment": sentiment,
+        })
 
+    return positive_count, negative_count, neutral_count, article_data
 
 # Function to display topics and analytics
-def display_topics_and_analytics(articles):
+def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
     lda = extract_topics(articles)
 
@@ -118,6 +123,15 @@ def display_topics_and_analytics(articles):
         st.write(f"Topic {topic_idx + 1}:")
         top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
         st.write(", ".join(top_words))
+
+    st.subheader("Data Analytics")
+    # Create a pandas DataFrame from the article data
+    df = pd.DataFrame(article_data)
+    st.dataframe(df)
+
+    st.subheader("Sentiment Distribution")
+    sentiment_counts = df["Sentiment"].value_counts()
+    st.bar_chart(sentiment_counts)
 
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
@@ -128,11 +142,11 @@ if input_data:
         file.write("\n".join(search_history))
 
     articles = search_news(input_data)
+    article_data = display_articles(articles)
 
     st.info(f"Found {len(articles)} articles")
 
-    display_articles(articles)
-    display_topics_and_analytics(articles)
+    display_topics_and_analytics(articles, article_data)
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
