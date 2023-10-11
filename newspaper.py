@@ -115,7 +115,7 @@ def display_topics_and_analytics(articles, article_data):
 
     st.subheader("Data Analytics")
 
-    if "Sentiment" in article_data[0]:
+    if article_data and "Sentiment" in article_data[0]:
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
@@ -125,6 +125,7 @@ def display_topics_and_analytics(articles, article_data):
         st.bar_chart(sentiment_counts)
     else:
         st.info("No sentiment data available for analytics.")
+
 
 # Main function
 def main():
