@@ -104,7 +104,6 @@ def display_articles(articles):
 
     return positive_count, negative_count, neutral_count, article_data
 
-# Function to display topics and analytics
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
     lda = extract_topics(articles)
@@ -116,7 +115,7 @@ def display_topics_and_analytics(articles, article_data):
 
     st.subheader("Data Analytics")
 
-    if article_data and "Sentiment" in article_data[0]:
+    if "Sentiment" in article_data[0]:
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
