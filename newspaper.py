@@ -103,6 +103,7 @@ def display_articles(articles):
         })
 
     return positive_count, negative_count, neutral_count, article_data
+
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
     
@@ -121,19 +122,16 @@ def display_topics_and_analytics(articles, article_data):
     
     st.subheader("Data Analytics")
 
-    if article_data:
-        if "Sentiment" in article_data[0]:
-            # Create a pandas DataFrame from the article data
-            df = pd.DataFrame(article_data)
-            st.dataframe(df)
+    if article_data and article_data[0] and "Sentiment" in article_data[0]:
+        # Create a pandas DataFrame from the article data
+        df = pd.DataFrame(article_data)
+        st.dataframe(df)
 
-            st.subheader("Sentiment Distribution")
-            sentiment_counts = df["Sentiment"].value_counts()
-            st.bar_chart(sentiment_counts)
-        else:
-            st.info("No sentiment data available for analytics.")
-
-
+        st.subheader("Sentiment Distribution")
+        sentiment_counts = df["Sentiment"].value_counts()
+        st.bar_chart(sentiment_counts)
+    else:
+        st.info("No sentiment data available for analytics.")
 
 # Main function
 def main():
