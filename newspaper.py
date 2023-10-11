@@ -15,6 +15,7 @@ st.set_page_config(
 
 nltk.download("vader_lexicon")
 
+# Initialize variables
 search_history = []
 user_score = 0
 sia = SentimentIntensityAnalyzer()
@@ -37,8 +38,7 @@ def search_news(keyword):
 
     if response.status_code == 200:
         data = response.json()
-        if 'articles' in data:
-            articles = data['articles']
+        articles = data.get('articles', [])
 
     return articles
 
@@ -59,7 +59,7 @@ def extract_topics(articles):
     lda.fit(tfidf)
     return lda
 
-
+# Function to display articles and return statistics
 def display_articles(articles):
     positive_count, negative_count, neutral_count = 0, 0, 0
     article_data = []
@@ -102,17 +102,9 @@ def display_articles(articles):
             "Sentiment": sentiment,
         })
 
-    # Check if "Sentiment" key exists in all elements of article_data
-    if all("Sentiment" in article for article in article_data):
-        return positive_count, negative_count, neutral_count, article_data
-    else:
-        st.warning("Sentiment data is missing in some articles.")
-        return positive_count, negative_count, neutral_count, []
+    return positive_count, negative_count, neutral_count, article_data
 
-
-
-
-
+# Function to display topics and analytics
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
     lda = extract_topics(articles)
@@ -124,7 +116,7 @@ def display_topics_and_analytics(articles, article_data):
 
     st.subheader("Data Analytics")
 
-    if "Sentiment" in article_data[0]:
+    if article_data and "Sentiment" in article_data[0]:
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
@@ -135,25 +127,33 @@ def display_topics_and_analytics(articles, article_data):
     else:
         st.info("No sentiment data available for analytics.")
 
+# Main function
+def main():
+    # Load search history
+    search_history = load_search_history()
 
-# Inside the main function
-input_data = st.text_input("Enter a keyword to search for news")
-if input_data:
-    search_history.append(input_data)
+    # Input for keyword search
+    input_data = st.text_input("Enter a keyword to search for news")
+    if input_data:
+        search_history.append(input_data)
 
-    with open("search_history.txt", mode="w") as file:
-        file.write("\n".join(search_history))
+        with open("search_history.txt", mode="w") as file:
+            file.write("\n".join(search_history))
 
-    articles = search_news(input_data)
-    article_data = display_articles(articles)
+        # Search for news articles
+        articles = search_news(input_data)
+        article_data = display_articles(articles)
 
-    st.info(f"Found {len(articles)} articles")
+        st.info(f"Found {len(articles)} articles")
 
-    display_topics_and_analytics(articles, article_data)
+        # Display topics and analytics
+        display_topics_and_analytics(articles, article_data)
 
-# Display the user's score
-st.write(f"Your Score: {user_score}")
+    # Display the user's score
+    st.write(f"Your Score: {user_score}")
 
 # Run the app
 if __name__ == "__main__":
+    main()
     st.write("Welcome to the News Search and Sentiment Analysis app.")
+
