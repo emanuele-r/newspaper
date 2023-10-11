@@ -61,6 +61,8 @@ def extract_topics(articles):
 
 
 def display_articles(articles):
+    global user_score  # Declare user_score as a global variable
+
     positive_count, negative_count, neutral_count = 0, 0, 0
     article_data = []
 
@@ -69,7 +71,6 @@ def display_articles(articles):
         content = article.get('content', '')
         author = article.get("author", "")
         link = article.get("url", "")
-
 
         sentiment = get_sentiment_label(content)
 
@@ -84,7 +85,7 @@ def display_articles(articles):
 
             if user_answer.lower() == correct_answer.lower():
                 st.success("Correct! You earned points.")
-                user_score += 10
+                user_score += 10  # Now user_score is accessible and can be modified globally
             else:
                 st.error("Sorry, that's incorrect.")
 
@@ -105,7 +106,6 @@ def display_articles(articles):
 
     return positive_count, negative_count, neutral_count, article_data
 
-# Function to display topics and analytics
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
     lda = extract_topics(articles)
@@ -116,13 +116,18 @@ def display_topics_and_analytics(articles, article_data):
         st.write(", ".join(top_words))
 
     st.subheader("Data Analytics")
-    # Create a pandas DataFrame from the article data
-    df = pd.DataFrame(article_data)
-    st.dataframe(df)
 
-    st.subheader("Sentiment Distribution")
-    sentiment_counts = df["Sentiment"].value_counts()
-    st.bar_chart(sentiment_counts)
+    if "Sentiment" in article_data[0]:
+        # Create a pandas DataFrame from the article data
+        df = pd.DataFrame(article_data)
+        st.dataframe(df)
+
+        st.subheader("Sentiment Distribution")
+        sentiment_counts = df["Sentiment"].value_counts()
+        st.bar_chart(sentiment_counts)
+    else:
+        st.info("No sentiment data available for analytics.")
+
 
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
