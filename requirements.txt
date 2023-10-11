@@ -6,5 +6,5 @@ plotly
 Requests
 streamlit
 wordcloud
-sklearn
+scikit-learn
 
