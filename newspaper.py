@@ -52,12 +52,19 @@ def get_sentiment_label(content):
     else:
         return "Neutral"
 
-# Function to extract topics from articles
 def extract_topics(articles):
-    content = [article.get('content', '') for article in articles]
+    content = [article.get('content', '') for article in articles if article.get('content')]
+    
+    if not content:
+        st.warning("No content available for topic extraction.")
+        return None
+
     tfidf = tfidf_vectorizer.fit_transform(content)
     lda.fit(tfidf)
     return lda
+
+
+
 
 # Function to display articles and return statistics
 def display_articles(articles):
