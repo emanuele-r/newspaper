@@ -29,7 +29,7 @@ def search_news(keyword):
     response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey=89de75b718bb45ba884f256d3b1710cc")
     articles = []
 
-    if response status_code == 200:
+    if response.status_code == 200:
         data = response.json()
         if 'articles' in data:
             articles = data['articles']
@@ -68,7 +68,6 @@ def display_articles(articles):
     for index, article in enumerate(articles):
         with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
             title = article.get('title', 'No title available')
-            author = article.get('author', 'No author available')
             url = article.get('url', '#')
             content = article.get('content', '')
 
@@ -82,7 +81,6 @@ def display_articles(articles):
                 neutral_count += 1
 
             st.write(f"Title: {title}")
-            st.write(f"Author: {author}")
             st.write(f"Link: [Read More]({url})")
             st.write(f"Sentiment: {sentiment}")
 
