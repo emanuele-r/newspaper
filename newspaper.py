@@ -59,8 +59,9 @@ def extract_topics(articles):
     # Initialize the LDA model
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
-
 def display_articles(articles):
+    global user_score  # Declare user_score as a global variable
+
     positive_count, negative_count, neutral_count = 0, 0, 0
     article_data = []
 
@@ -103,6 +104,7 @@ def display_articles(articles):
         })
 
     return positive_count, negative_count, neutral_count, article_data
+
     
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
