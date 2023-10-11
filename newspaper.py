@@ -4,6 +4,8 @@ import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
@@ -43,6 +45,31 @@ def get_sentiment_label(content):
         return "Negative"
     else:
         return "Neutral"
+        
+def extract_topics(articles):
+    content = [article.get('content', '') for article in articles]
+    
+    # Create a TF-IDF vectorizer
+    tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
+    
+    # Apply the vectorizer to the content
+    tfidf = tfidf_vectorizer.fit_transform(content)
+    
+    # Perform Latent Dirichlet Allocation (LDA) for topic modeling
+    lda = LatentDirichletAllocation(n_components=5, random_state=42)
+    lda.fit(tfidf)
+    
+    return lda
+
+def display_topics_and_analytics(articles):
+    st.subheader("Topics Tags")
+    lda = extract_topics(articles)
+    
+    # Display the topics
+    for topic_idx, topic in enumerate(lda.components_):
+        st.write(f"Topic {topic_idx + 1}:")
+        top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
+        st.write(", ".join(top_words))
 
 # Function to display articles and sentiment analysis
 def display_articles(articles):
@@ -93,14 +120,9 @@ if input_data:
     st.info(f"Found {len(articles)} articles")
 
     display_articles(articles)  # Add quizzes/challenges to articles
+    display_topics_and_analytics(articles)  # Add topics tags and analytics
 
-    # Generate the word cloud
-    all_content = " ".join([article.get('content', '') for article in articles])
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_content)
 
-    # Display the word cloud
-    st.subheader("Word Cloud")
-    st.image(wordcloud.to_array(), use_container_width=True)
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
