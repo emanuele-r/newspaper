@@ -104,7 +104,7 @@ def display_topics_and_analytics(articles):
     for topic_idx, topic in enumerate(lda.components_):
         st.write(f"Topic {topic_idx + 1}:")
         top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
-        st.write(", ".join(top_words)
+        st.write(", ".join(top_words))
         
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
