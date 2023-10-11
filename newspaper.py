@@ -122,7 +122,7 @@ def display_topics_and_analytics(articles, article_data):
     
     st.subheader("Data Analytics")
 
-    if article_data and any("Sentiment" in article and "Sentiment" in article for article in article_data):
+    if article_data and all("Sentiment" in article and article["Sentiment"] for article in article_data):
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
