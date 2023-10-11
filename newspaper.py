@@ -48,28 +48,29 @@ def get_sentiment_label(content):
         
 def extract_topics(articles):
     content = [article.get('content', '') for article in articles]
-    
+
     # Create a TF-IDF vectorizer
     tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
-    
+
     # Apply the vectorizer to the content
     tfidf = tfidf_vectorizer.fit_transform(content)
-    
+
     # Perform Latent Dirichlet Allocation (LDA) for topic modeling
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
-    
-    return lda
+
+    return lda, tfidf_vectorizer  # Return both the LDA model and the vectorizer
+
 
 def display_topics_and_analytics(articles):
     st.subheader("Topics Tags")
-    lda = extract_topics(articles)
-    
+    lda, tfidf_vectorizer = extract_topics(articles)  # Unpack both the LDA model and the vectorizer
+
     # Display the topics
     for topic_idx, topic in enumerate(lda.components_):
         st.write(f"Topic {topic_idx + 1}:")
         top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
-        st.write(", ".join(top_words))
+        st.write(", ".join(top_words)
 
 # Function to display articles and sentiment analysis
 def display_articles(articles):
