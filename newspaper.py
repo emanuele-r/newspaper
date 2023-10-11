@@ -8,14 +8,20 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="News Search and Sentiment Analysis", page_icon=":newspaper:", layout="wide")
+st.set_page_config(
+    page_title="News Search and Sentiment Analysis",
+    page_icon=":newspaper:",
+    layout="wide"
+)
 
 nltk.download("vader_lexicon")
 
+# Initialize global variables
 search_history = []
-user_score = 0  # Initialize user's score
+user_score = 0
 sia = SentimentIntensityAnalyzer()
-tfidf_vectorizer = None  # Define tfidf_vectorizer globally
+tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
+lda = LatentDirichletAllocation(n_components=5, random_state=42)
 
 # Function to load search history
 def load_search_history():
@@ -27,7 +33,8 @@ def load_search_history():
 
 # Function to search for news articles
 def search_news(keyword):
-    response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey=89de75b718bb45ba884f256d3b1710cc")
+    api_key = "89de75b718bb45ba884f256d3b1710cc"
+    response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey={api_key}")
     articles = []
 
     if response.status_code == 200:
@@ -46,21 +53,12 @@ def get_sentiment_label(content):
         return "Negative"
     else:
         return "Neutral"
-        
+
+# Function to extract topics from articles
 def extract_topics(articles):
     content = [article.get('content', '') for article in articles]
-
-    # Create a TF-IDF vectorizer
-    global tfidf_vectorizer  # Use the globally defined tfidf_vectorizer
-    tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
-
-    # Apply the vectorizer to the content
     tfidf = tfidf_vectorizer.fit_transform(content)
-
-    # Perform Latent Dirichlet Allocation (LDA) for topic modeling
-    lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
-
     return lda
 
 # Function to display articles and sentiment analysis
@@ -68,19 +66,12 @@ def display_articles(articles):
     positive_count, negative_count, neutral_count = 0, 0, 0
 
     for index, article in enumerate(articles):
-        with st.expander(f"Article {index + 1} - {article.get('title', 'No title available')}"):
-            title = article.get('title', 'No title available')
-            content = article.get('content', '')
+        title = article.get('title', 'No title available')
+        content = article.get('content', '')
 
-            sentiment = get_sentiment_label(content)
+        sentiment = get_sentiment_label(content)
 
-            if sentiment == "Positive":
-                positive_count += 1
-            elif sentiment == "Negative":
-                negative_count += 1
-            else:
-                neutral_count += 1
-
+        with st.expander(f"Article {index + 1} - {title}"):
             st.write(f"Title: {title}")
             st.write(f"Sentiment: {sentiment}")
 
@@ -89,9 +80,16 @@ def display_articles(articles):
 
             if user_answer.lower() == correct_answer.lower():
                 st.success("Correct! You earned points.")
-                user_score += 10  # Assign points to the user
+                user_score += 10
             else:
                 st.error("Sorry, that's incorrect.")
+
+        if sentiment == "Positive":
+            positive_count += 1
+        elif sentiment == "Negative":
+            negative_count += 1
+        else:
+            neutral_count += 1
 
     return positive_count, negative_count, neutral_count
 
@@ -100,12 +98,11 @@ def display_topics_and_analytics(articles):
     st.subheader("Topics Tags")
     lda = extract_topics(articles)
 
-    # Display the topics
     for topic_idx, topic in enumerate(lda.components_):
         st.write(f"Topic {topic_idx + 1}:")
         top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in topic.argsort()[-10:]]
-        st.write(", ".join(top_words))
-        
+        st.write(", ".join(top_words)
+
 # Inside the main function
 input_data = st.text_input("Enter a keyword to search for news")
 if input_data:
@@ -118,8 +115,8 @@ if input_data:
 
     st.info(f"Found {len(articles)} articles")
 
-    display_articles(articles)  # Display articles and sentiment analysis
-    display_topics_and_analytics(articles)  # Display topics tags and analytics
+    display_articles(articles)
+    display_topics_and_analytics(articles)
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
