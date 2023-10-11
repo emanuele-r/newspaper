@@ -117,13 +117,12 @@ def display_topics_and_analytics(articles, article_data):
             top_word_indices = topic.argsort()[-num_top_words:][::-1]
             top_words = [tfidf_vectorizer.get_feature_names_out()[i] for i in top_word_indices]
             st.write(", ".join(top_words))
-
     else:
         st.warning("Topic extraction is not available because 'lda' is not initialized.")
     
     st.subheader("Data Analytics")
 
-    if article_data and "Sentiment" in article_data[0]:
+    if article_data and article_data[0] and "Sentiment" in article_data[0]:
         # Create a pandas DataFrame from the article data
         df = pd.DataFrame(article_data)
         st.dataframe(df)
@@ -133,6 +132,7 @@ def display_topics_and_analytics(articles, article_data):
         st.bar_chart(sentiment_counts)
     else:
         st.info("No sentiment data available for analytics.")
+
 
 # Main function
 def main():
