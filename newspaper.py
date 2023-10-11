@@ -91,9 +91,22 @@ def display_articles(articles):
 
     return positive_count, negative_count, neutral_count
 
-# Rest of your code (functions)...
+st.subheader("Word Cloud")
 
-# Inside the main function
+# Combine the content of all articles into one text
+all_content = " ".join([article.get('content', '') for article in articles])
+
+# Generate the word cloud
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_content)
+
+# Display the word cloud using Matplotlib
+st.pyplot(plt.figure(figsize=(10, 5)))
+plt.imshow(wordcloud, interpolation="bilinear")
+plt.axis("off")
+st.pyplot(plt)
+
+
+
 input_data = st.text_input("Enter a keyword to search for news")
 if input_data:
     search_history.append(input_data)
