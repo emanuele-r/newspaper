@@ -132,22 +132,22 @@ def main():
     search_history = load_search_history()
 
     # Input for keyword search
-    input_data = st.text_input("Enter a keyword to search for news")
-    if input_data:
-        search_history.append(input_data)
+ input_data = st.text_input("Enter a keyword to search for news")
+if input_data:
+    search_history.append(input_data)
 
+    try:
         with open("search_history.txt", mode="w") as file:
             file.write("\n".join(search_history))
+    except Exception as e:
+        st.error(f"An error occurred while saving the search history: {str(e)}")
 
-        # Search for news articles
-        articles = search_news(input_data)
-        article_data = display_articles(articles)
+    articles = search_news(input_data)
+    article_data = display_articles(articles)
 
-        st.info(f"Found {len(articles)} articles")
+    st.info(f"Found {len(articles)} articles")
 
-        # Display topics and analytics
-        display_topics_and_analytics(articles, article_data)
-
+    display_topics_and_analytics(articles, article_data)
     # Display the user's score
     st.write(f"Your Score: {user_score}")
 
