@@ -118,8 +118,8 @@ if input_data:
 
     st.info(f"Found {len(articles)} articles")
 
-    display_articles(articles)  # Add quizzes/challenges to articles
-    display_topics_and_analytics(articles)  # Add topics tags and analytics
+    display_articles(articles)  # Display articles and sentiment analysis
+    display_topics_and_analytics(articles)  # Display topics tags and analytics
 
 # Display the user's score
 st.write(f"Your Score: {user_score}")
