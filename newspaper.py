@@ -6,7 +6,8 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-import pandas as pd  # Import pandas for data analytics
+import pandas as pd  
+from summarizer import Summarizer
 
 # Set Streamlit page configuration
 st.set_page_config(
