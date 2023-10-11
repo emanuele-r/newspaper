@@ -58,11 +58,7 @@ def extract_topics(articles):
     tfidf = tfidf_vectorizer.fit_transform(content)
     lda.fit(tfidf)
     return lda
-
-
 def display_articles(articles):
-    global user_score  # Declare user_score as a global variable
-
     positive_count, negative_count, neutral_count = 0, 0, 0
     article_data = []
 
@@ -85,7 +81,7 @@ def display_articles(articles):
 
             if user_answer.lower() == correct_answer.lower():
                 st.success("Correct! You earned points.")
-                user_score += 10  # Now user_score is accessible and can be modified globally
+                user_score += 10
             else:
                 st.error("Sorry, that's incorrect.")
 
@@ -104,7 +100,15 @@ def display_articles(articles):
             "Sentiment": sentiment,
         })
 
-    return positive_count, negative_count, neutral_count, article_data
+    # Ensure article_data includes Sentiment in all elements
+    if all("Sentiment" in article for article in article_data):
+        return positive_count, negative_count, neutral_count, article_data
+    else:
+        st.warning("Sentiment data is missing in some articles.")
+        return positive_count, negative_count, neutral_count, []
+
+
+
 
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
