@@ -6,6 +6,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
+from summarizer import Summarizer
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -16,12 +17,15 @@ st.set_page_config(
 
 nltk.download("vader_lexicon")
 
-# Initialize global variables
 search_history = []
 user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 lda = LatentDirichletAllocation(n_components=5, random_state=42)
+summarizer_model = Summarizer()  # Initialize the summarization model
+
+
+
 
 # Function to load search history
 def load_search_history():
@@ -61,7 +65,10 @@ def extract_topics(articles):
     lda.fit(tfidf)
     return lda
 
-# Function to display articles and sentiment analysis
+def generate_summary(article):
+    content = article.get('content', '')
+    return summarizer_model(content)
+
 def display_articles(articles):
     positive_count, negative_count, neutral_count = 0, 0, 0
 
@@ -69,10 +76,14 @@ def display_articles(articles):
         title = article.get('title', 'No title available')
         content = article.get('content', '')
 
+        # Generate a summary
+        summary = generate_summary(article)
+
         sentiment = get_sentiment_label(content)
 
         with st.expander(f"Article {index + 1} - {title}"):
             st.write(f"Title: {title}")
+            st.write(f"Summary: {summary}")  # Display the summary
             st.write(f"Sentiment: {sentiment}")
 
             user_answer = st.text_input(f"Answer for Article {index + 1}", key=f"answer_{index}")
@@ -92,6 +103,7 @@ def display_articles(articles):
             neutral_count += 1
 
     return positive_count, negative_count, neutral_count
+
 
 # Function to display topics and analytics
 def display_topics_and_analytics(articles):
