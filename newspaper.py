@@ -21,6 +21,7 @@ user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 lda = LatentDirichletAllocation(n_components=5, random_state=42)
+summarizer_model = Summarizer()
 
 # Function to load search history
 def load_search_history():
