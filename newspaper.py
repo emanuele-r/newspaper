@@ -56,19 +56,20 @@ def get_sentiment_label(content):
 def extract_topics(articles):
     global tfidf_vectorizer, lda  # Declare them as global variables
     content = [article.get('content', '') for article in articles]
-    
+
     # Filter out very short or empty documents
     content = [doc for doc in content if len(doc) > 10]  # You can adjust the minimum length as needed
-    
+
     if not content:
         st.warning("No valid content to extract topics from.")
         return
-    
+
     tfidf = tfidf_vectorizer.fit_transform(content)
 
     # Initialize the LDA model
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
+
 
 
 def display_articles(articles):
