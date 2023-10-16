@@ -40,6 +40,8 @@ def search_news(keyword):
     if response.status_code == 200:
         data = response.json()
         articles = data.get('articles', [])
+    else:
+        st.error(f"Api request failed with {response.status_code}")
 
     return articles
 
