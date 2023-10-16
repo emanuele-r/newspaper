@@ -21,6 +21,8 @@ user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 lda = None  # Initialize LDA model
+selected_sentiment = "All"
+
 
 # Function to load search history
 def load_search_history():
@@ -105,6 +107,44 @@ def display_articles(articles):
 
     return positive_count, negative_count, neutral_count, article_data
 
+
+# Function to display articles with sentiment filter
+def display_articles_filtered(articles):
+    global user_score  # Declare user_score as a global variable
+
+    positive_count, negative_count, neutral_count = 0, 0, 0
+    article_data = []
+
+    for index, article in enumerate(articles):
+        title = article.get('title', 'No title available')
+        content = article.get('content', '')
+        author = article.get("author", "")
+        link = article.get("url", "")
+
+        sentiment = get_sentiment_label(content)
+
+        if selected_sentiment == "All" or sentiment == selected_sentiment:
+            with st.expander(f"Article {index + 1} - {title}"):
+                st.write(f"Title: {title}")
+                st.write(f"Author: {author}")
+                st.write(f"Link to News: {link}")
+                st.write(f"Sentiment: {sentiment}")
+
+                user_answer = st.text_input(f"Answer for Article {index + 1}", key=f"answer_{index}")
+                correct_answer = "Yes"
+
+                if user_answer.lower() == correct_answer.lower():
+                    st.success("Correct! You earned points.")
+                    user_score += 10
+                else:
+                    st.error("Sorry, that's incorrect.")
+
+            if sentiment == "Positive":
+                positive_count += 1
+            elif sentiment == "Negative":
+                negative_count += 1
+            else:
+                neutral_count += 1
     
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
@@ -135,6 +175,11 @@ def display_topics_and_analytics(articles, article_data):
     else:
         st.info("No sentiment data available for analytics.")
 
+# Add a button switch to select sentiment type
+selected_sentiment = st.radio("Select Sentiment:", ["All", "Positive", "Negative", "Neutral"])
+
+# Display articles with sentiment filter
+positive_count, negative_count, neutral_count, article_data = display_articles_filtered(articles)
 
   
 # Main function
