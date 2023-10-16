@@ -5,6 +5,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 import pandas as pd
+import openai
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -21,7 +22,9 @@ user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 lda = None  # Initialize LDA model
-bookmarks = {}  # Create a dictionary to store bookmarks
+bookmarks = {}  
+openai.api_key = "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"
+
 
 # Function to load search history
 def load_search_history():
@@ -72,6 +75,16 @@ def extract_topics(articles):
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
 
+from transformers import BartForConditionalGeneration, BartTokenizer
+model_name = "facebook/bart-large-cnn"
+model = BartForConditionalGeneration.from_pretrained(model_name)
+tokenizer = BartTokenizer.from_pretrained(model_name)
+
+def generate_summary(article_text):
+    inputs = tokenizer(article_text, max_length=1024, return_tensors="pt", truncation=True)
+    summary_ids = model.generate(inputs.input_ids, max_length=150, min_length=50, length_penalty=2.0, num_beams=4, early_stopping=True)
+    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    return summary
 
 
 def display_articles(articles):
@@ -87,9 +100,12 @@ def display_articles(articles):
         link = article.get("url", "")
 
         sentiment = get_sentiment_label(content)
+        summary = generate_summary(content)
+        ai_image = generate_image_from_text(summary)
 
         with st.expander(f"Article {index + 1} - {title}"):
             st.write(f"Title: {title}")
+            st.image(ai_image, caption=f"AI-Generated Image for {title}", use_column_width=True)
             st.write(f"Author: {author}")
             st.write(f"Link to News: {link}")
             st.write(f"Sentiment: {sentiment}")
@@ -148,6 +164,17 @@ def display_topics_and_analytics(articles, article_data):
         st.bar_chart(sentiment_counts)
     else:
         st.info("No sentiment data available for analytics.")
+
+def generate_image_from_text(description):
+    response = openai.Image.create(
+        model="image-alpha-001",
+        prompts=description,
+        n=1,
+        size="256x256",
+    )
+    return response.choices[0].image
+
+
 def main():
     global bookmarks, tfidf_vectorizer, lda, user_score, search_history
 
