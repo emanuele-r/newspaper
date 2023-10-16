@@ -146,10 +146,8 @@ def display_topics_and_analytics(articles, article_data):
         st.bar_chart(sentiment_counts)
     else:
         st.info("No sentiment data available for analytics.")
-
-# Main function
 def main():
-    global bookmarks, tfidf_vectorizer, lda 
+    global bookmarks, tfidf_vectorizer, lda, user_score, search_history
 
     # Load search history
     search_history = load_search_history()
@@ -166,12 +164,17 @@ def main():
             st.error(f"An error occurred while saving the search history: {str(e)}")
 
         articles = search_news(input_data)
-        extract_topics(articles)  # Call the topic extraction function
-        article_data = display_articles(articles)
+        
+        if articles:
+            extract_topics(articles)  # Call the topic extraction function
+            article_data = display_articles(articles)
 
-        st.info(f"Found {len(articles)} articles")
+            st.info(f"Found {len(articles)} articles")
 
-        display_topics_and_analytics(articles, article_data)
+            display_topics_and_analytics(articles, article_data)
+        else:
+            st.warning("No articles found for the given keyword.")
+
         # Display the user's score
         st.write(f"Your Score: {user_score}")
 
@@ -179,14 +182,17 @@ def main():
     st.sidebar.header("Bookmarks")
     if st.sidebar.button("Add Bookmark"):
         bookmark_name = st.sidebar.text_input("Bookmark Name")
-        bookmarks.append(bookmark_name)
+        if articles:
+            bookmarks[bookmark_name] = articles
+        else:
+            st.warning("No articles to bookmark. Perform a search and add articles first.")
 
     selected_bookmark = st.sidebar.selectbox("Select Bookmark", list(bookmarks.keys()))
 
     if selected_bookmark:
         st.subheader(selected_bookmark)
         display_articles(bookmarks[selected_bookmark])
-        
+
 # Run the app
 if __name__ == "__main__":
     main()
