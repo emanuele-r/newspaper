@@ -33,7 +33,7 @@ def load_search_history():
 
 # Function to search for news articles
 def search_news(keyword):
-    api_key = "Y"  # Repla89de75b718bb45ba884f256d3b1710cc" with your News API key
+    api_key = "89de75b718bb45ba884f256d3b1710cc" with your News API key
     response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey={api_key}")
     articles = []
 
