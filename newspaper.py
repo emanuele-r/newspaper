@@ -8,7 +8,7 @@ import pandas as pd
 
 # Set Streamlit page configuration
 st.set_page_config(
-    page_title="News Search and Sentiment Analysis",
+    page_title="Personalized News Dashboard",
     page_icon=":newspaper:",
     layout="wide"
 )
@@ -21,8 +21,7 @@ user_score = 0
 sia = SentimentIntensityAnalyzer()
 tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
 lda = None  # Initialize LDA model
-selected_sentiment = "All"
-
+bookmarks = {}  # Create a dictionary to store bookmarks
 
 # Function to load search history
 def load_search_history():
@@ -34,7 +33,7 @@ def load_search_history():
 
 # Function to search for news articles
 def search_news(keyword):
-    api_key = "89de75b718bb45ba884f256d3b1710cc"
+    api_key = "YOUR_API_KEY"  # Replace with your News API key
     response = requests.get(f"https://newsapi.org/v2/everything?q={keyword}&apiKey={api_key}")
     articles = []
 
@@ -61,6 +60,7 @@ def extract_topics(articles):
     # Initialize the LDA model
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
     lda.fit(tfidf)
+
 def display_articles(articles):
     global user_score  # Declare user_score as a global variable
 
@@ -107,45 +107,6 @@ def display_articles(articles):
 
     return positive_count, negative_count, neutral_count, article_data
 
-
-# Function to display articles with sentiment filter
-def display_articles_filtered(articles):
-    global user_score  # Declare user_score as a global variable
-
-    positive_count, negative_count, neutral_count = 0, 0, 0
-    article_data = []
-
-    for index, article in enumerate(articles):
-        title = article.get('title', 'No title available')
-        content = article.get('content', '')
-        author = article.get("author", "")
-        link = article.get("url", "")
-
-        sentiment = get_sentiment_label(content)
-
-        if selected_sentiment == "All" or sentiment == selected_sentiment:
-            with st.expander(f"Article {index + 1} - {title}"):
-                st.write(f"Title: {title}")
-                st.write(f"Author: {author}")
-                st.write(f"Link to News: {link}")
-                st.write(f"Sentiment: {sentiment}")
-
-                user_answer = st.text_input(f"Answer for Article {index + 1}", key=f"answer_{index}")
-                correct_answer = "Yes"
-
-                if user_answer.lower() == correct_answer.lower():
-                    st.success("Correct! You earned points.")
-                    user_score += 10
-                else:
-                    st.error("Sorry, that's incorrect.")
-
-            if sentiment == "Positive":
-                positive_count += 1
-            elif sentiment == "Negative":
-                negative_count += 1
-            else:
-                neutral_count += 1
-    
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
 
@@ -175,15 +136,10 @@ def display_topics_and_analytics(articles, article_data):
     else:
         st.info("No sentiment data available for analytics.")
 
-# Add a button switch to select sentiment type
-selected_sentiment = st.radio("Select Sentiment:", ["All", "Positive", "Negative", "Neutral"])
-
-# Display articles with sentiment filter
-positive_count, negative_count, neutral_count, article_data = display_articles_filtered(articles)
-
-  
 # Main function
 def main():
+    global bookmarks
+
     # Load search history
     search_history = load_search_history()
 
@@ -208,7 +164,19 @@ def main():
         # Display the user's score
         st.write(f"Your Score: {user_score}")
 
+    # Bookmarks
+    st.sidebar.header("Bookmarks")
+    if st.sidebar.button("Add Bookmark"):
+        bookmark_name = st.sidebar.text_input("Bookmark Name")
+        bookmarks[bookmark_name] = articles
+
+    selected_bookmark = st.sidebar.selectbox("Select Bookmark", list(bookmarks.keys()))
+
+    if selected_bookmark:
+        st.subheader(selected_bookmark)
+        display_articles(bookmarks[selected_bookmark])
+
 # Run the app
 if __name__ == "__main__":
     main()
-    st.write("Welcome to the News Search and Sentiment Analysis app.")
+    st.write("Welcome to the Personalized News Dashboard app.")
