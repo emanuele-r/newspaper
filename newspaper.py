@@ -179,7 +179,7 @@ def main():
     st.sidebar.header("Bookmarks")
     if st.sidebar.button("Add Bookmark"):
         bookmark_name = st.sidebar.text_input("Bookmark Name")
-        bookmarks[bookmark_name] = articles
+        bookmarks.append(bookmark_name)
 
     selected_bookmark = st.sidebar.selectbox("Select Bookmark", list(bookmarks.keys()))
 
