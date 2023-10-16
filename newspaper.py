@@ -54,6 +54,7 @@ def get_sentiment_label(content):
         return "Neutral"
         
 def extract_topics(articles):
+    global tfidf_vectorizer, lda  # Declare them as global variables
     content = [article.get('content', '') for article in articles]
     
     # Filter out very short or empty documents
@@ -67,7 +68,8 @@ def extract_topics(articles):
 
     # Initialize the LDA model
     lda = LatentDirichletAllocation(n_components=5, random_state=42)
-    lda.fit(tfidf
+    lda.fit(tfidf)
+
 
 def display_articles(articles):
     global user_score  # Declare user_score as a global variable
@@ -146,7 +148,7 @@ def display_topics_and_analytics(articles, article_data):
 
 # Main function
 def main():
-    global bookmarks
+    global bookmarks, tfidf_vectorizer, lda 
 
     # Load search history
     search_history = load_search_history()
@@ -183,7 +185,7 @@ def main():
     if selected_bookmark:
         st.subheader(selected_bookmark)
         display_articles(bookmarks[selected_bookmark])
-
+        
 # Run the app
 if __name__ == "__main__":
     main()
