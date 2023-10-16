@@ -86,7 +86,6 @@ def generate_summary(article_text):
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary
 
-
 def display_articles(articles):
     global user_score  # Declare user_score as a global variable
 
@@ -100,15 +99,27 @@ def display_articles(articles):
         link = article.get("url", "")
 
         sentiment = get_sentiment_label(content)
-        summary = generate_summary(content)
-        ai_image = generate_image_from_text(summary)
 
         with st.expander(f"Article {index + 1} - {title}"):
+            # Display the article title
             st.write(f"Title: {title}")
-            st.image(ai_image, caption=f"AI-Generated Image for {title}", use_column_width=True)
-            st.write(f"Author: {author}")
-            st.write(f"Link to News: {link}")
-            st.write(f"Sentiment: {sentiment}")
+
+            # Generate a summary of the article
+            summary = generate_summary(content)  # You can use the generate_summary function mentioned earlier
+            st.markdown(summary)  # Display the summary as Markdown
+
+            # Generate an AI image based on the summary
+            ai_image = generate_image_from_text(summary)  # You can use the generate_image_from_text function
+
+            # Display the AI-generated image to the right of the title
+            col1, col2 = st.beta_columns([1, 4])  # Adjust the column widths as needed
+            with col1:
+                st.image(ai_image, caption=f"AI-Generated Image for {title}", use_column_width=True)
+            with col2:
+                # Display other information like author, link, and sentiment
+                st.write(f"Author: {author}")
+                st.write(f"Link to News: {link}")
+                st.write(f"Sentiment: {sentiment}")
 
             user_answer = st.text_input(f"Answer for Article {index + 1}", key=f"answer_{index}")
             correct_answer = "Yes"
@@ -135,6 +146,9 @@ def display_articles(articles):
         })
 
     return positive_count, negative_count, neutral_count, article_data
+
+
+
 
 def display_topics_and_analytics(articles, article_data):
     st.subheader("Topics Tags")
